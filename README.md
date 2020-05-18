@@ -17,6 +17,10 @@ sudo apt install postgresql
 sudo apt install nginx
 ```
 
+```
+sudo /etc/init.d/nginx start
+```
+
 ### Database setup
 ```bash
 sudo mkdir -p /usr/local/pgsql/data
@@ -128,3 +132,68 @@ Run the app and serve it on the local network.
 ```
 python manage.py runserver $(hostname -I | awk '{print $1}'):8000
 ```
+
+### Use uwsgi
+
+Configure nginx to talk to uwsgi. For that, update the file /etc/nginx/sites-enabled/mysite_nginx.conf
+
+```
+# the upstream component nginx needs to connect to
+upstream django {
+    server unix:///path/to/your/mysite/mysite.sock; # for a file socket
+    #server 127.0.0.1:8001; # for a web port socket (we'll use this first)
+}
+
+# configuration of the server
+server {
+    # the port your site will be served on
+    listen      8000;
+    # the domain name it will serve for
+    server_name example.com; # substitute your machine's IP address or FQDN
+    charset     utf-8;
+
+    # max upload size
+    client_max_body_size 75M;   # adjust to taste
+
+    # Django media
+    location /media  {
+        alias /path/to/your/mysite/media;  # your Django project's media files - amend as required
+    }
+
+    location /static {
+        alias /path/to/your/mysite/static; # your Django project's static files - amend as required
+    }
+
+    # Finally, send all non-media requests to the Django server.
+    location / {
+        uwsgi_pass  django;
+        include     /etc/nginx/uwsgi_params;
+    }
+}
+```
+
+Add the following to mysite/settings.py
+
+```
+STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+```
+
+and run
+
+```
+python manage.py collectstatic
+```
+
+Restart nginx for changes to take effect
+
+```
+sudo /etc/init.d/nginx restart
+```
+
+Run 
+
+```
+uwsgi --socket mysite.sock --module mysite.wsgi --chmod-socket=666
+```
+
+and check that everything is working, e.g. by visiting [localhost:8000](localhost:8000).
