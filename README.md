@@ -45,11 +45,15 @@ pip install psycopg2
 pip install uwsgi
 ```
 
+Autogenerate some code around Django project
 ```
 django-admin.py startproject mysite .
 ```
 
-This results in the following structure, where the django folder holds our Python virtual environment, mysite folder is populated by Django, and polls folder can be cloned from this repository.
+Clone this repo into your django-project folder.
+
+This results in the following structure, where the django folder holds our Python virtual environment, mysite folder is populated by Django, and polls folder contains all the steps completed in [Writing your first Django app](https://docs.djangoproject.com/en/3.0/intro/).
+
 ```
 django-project/
 ├── django
@@ -80,4 +84,14 @@ django-project/
 └── templates
     └── admin
         └── base_site.html
+```
+
+Create database tables
+```
+python manage.py migrate
+```
+
+Run the app
+```
+python manage.py runserver $(hostname -I | awk '{print $1}'):8000
 ```
