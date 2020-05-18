@@ -26,7 +26,7 @@ sudo -u postgres /usr/lib/postgresql/11/bin/pg_ctl -D /usr/local/pgsql/data/-l l
 sudo -u postgres psql
 ```
 
-Replace "mysite" with your project name, "myuser" with your database user and "mypass" with your database password.
+Replace "mysite" with actual project name, "myuser" with actual database user and "mypass" with acutal database password.
 ```SQL
 CREATE DATABASE mysite;
 CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypass';
@@ -43,6 +43,7 @@ source django/bin/activate
 pip install Django
 pip install psycopg2
 pip install uwsgi
+pip install python-dotenv
 ```
 
 Autogenerate some code around Django project
@@ -50,14 +51,46 @@ Autogenerate some code around Django project
 django-admin.py startproject mysite .
 ```
 
-Clone this repo into your django-project folder.
+Clone this repo into the django-project folder.
 
-This results in the following structure, where the django folder holds our Python virtual environment, mysite folder is populated by Django, and polls folder contains all the steps completed in [Writing your first Django app](https://docs.djangoproject.com/en/3.0/intro/).
+Create .env file for database connection configuration
+
+```
+DATABASE_NAME=mysite
+DATABASE_USER=myuser
+DATABASE_PASS=mypass
+DATABASE_HOST=myhost
+```
+
+To make the Django project see your dotenv configuration, first load it at the top of wsgi.py and manage.py
+
+```
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv())
+```
+
+then adjust settings.py in mysite directory
+
+```
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv("DATABASE_NAME"),
+        'USER': os.getenv("DATABASE_USER"),
+        'PASSWORD': os.getenv("DATABASE_PASS"),
+        'HOST': os.getenv("DATABASE_HOST"),
+        'PORT': '5432',
+    }
+}
+```
+
+The project should now have the following structure, where the Django folder holds our Python virtual environment, the mysite folder is populated by Django, and the polls folder contains the result of the completed tutorial [Writing your first Django app](https://docs.djangoproject.com/en/3.0/intro/).
 
 ```
 django-project/
 ├── django
 │   └── ...
+├── .env
 ├── mysite
 │   ├── asgi.py
 │   ├── __init__.py
@@ -91,7 +124,7 @@ Create database tables
 python manage.py migrate
 ```
 
-Run the app
+Run the app and serve it on the local network.
 ```
 python manage.py runserver $(hostname -I | awk '{print $1}'):8000
 ```
