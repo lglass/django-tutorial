@@ -65,7 +65,8 @@ Create .env file for database connection configuration
 DATABASE_NAME=mysite
 DATABASE_USER=myuser
 DATABASE_PASS=mypass
-DATABASE_HOST=myhost
+DATABASE_HOST=mydbhost
+MYHOST=myhost
 ```
 
 To make the Django project see your dotenv configuration, first load it at the top of wsgi.py and manage.py
@@ -75,9 +76,11 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 ```
 
-then adjust settings.py in mysite directory
+then adjust mysite/settings.py
 
 ```
+ALLOWED_HOSTS = [os.getenv('MYHOST')]
+...
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
