@@ -28,7 +28,7 @@ sudo /etc/init.d/nginx start
 sudo mkdir -p /usr/local/pgsql/data
 sudo chown postgres /usr/local/pgsql/data
 sudo -u postgres /usr/lib/postgresql/11/bin/initdb -D /usr/local/pgsql/data
-sudo -u postgres /usr/lib/postgresql/11/bin/pg_ctl -D /usr/local/pgsql/data/-l logfile start &
+sudo -u postgres /usr/lib/postgresql/11/bin/pg_ctl -D /usr/local/pgsql/data >logfile 2>&1 &
 sudo -u postgres psql
 ```
 
